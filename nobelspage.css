@@ -1,0 +1,159 @@
+
+body {
+    font-family: Helvetica;
+    margin: 0;
+    background: url(np1.jpg) no-repeat;
+    background-size: cover;
+    background-attachment: fixed;
+    padding: 30px;
+    padding-top: 20px;
+    color: white;
+    text-align: center;
+    padding-bottom: 60px;
+
+}
+
+
+#button {
+    font-size: 130%;
+    color: white;
+    border-collapse: collapse;
+    background-color: #255957;
+    border-radius: 5px;
+    border-color: #255957;
+    text-decoration: none;
+    width: 20%;
+
+}
+
+
+#button:hover {
+    border: 1px solid #255957;
+    background-color: #1F4948;
+    cursor: pointer;
+
+}
+
+.gbutton {
+    color: #FFF;
+    margin: 0.5%;
+    margin-left: 1%;
+    opacity: 0.8;
+    cursor: pointer;
+    font-size: 100%;
+    font-size: 300%;
+
+}
+
+
+.infob {
+    background: #1B4140;
+    color: #FFF;
+    border-radius: 5px;
+    border-right: 1px solid;
+    padding: 3%;
+    margin: 3%;
+    background-color: #437C90;
+    cursor: pointer;
+    font-size: 80%;
+}
+
+.infob:hover {
+    border: 1px solid #255957;
+    background-color: #1F4948;
+    cursor: pointer;
+}
+
+.select-css {
+    background: #323232;
+    color: #FFF;
+    border-right: 1px solid;
+    opacity: 0.8;
+    cursor: pointer;
+    font-size: 100%;
+    padding: 1px;
+    padding-right: 2%;
+    padding-left: 2%;
+
+}
+
+.select-css:hover {
+    background-color: black;
+}
+
+#category {
+    padding-right: 1%;
+}
+
+/*  css style reference for modal,  its content and the close: https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    padding-top: 90px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+
+    background-color: black;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: black;
+}
+
+
+.content {
+    background-color: whitesmoke;
+    margin: auto;
+    padding: 8px;
+    width: 80%;
+    text-align: left;
+    overflow: scroll;
+}
+
+.close {
+
+    color: grey;
+    float: right;
+    font-size: 200%;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    cursor: pointer;
+}
+
+/* table reference: https://www.w3schools.com/css/tryit.asp?filename=trycss_table_fancy*/
+table {
+    color: black;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table,
+th,
+td {
+    border: 1px solid grey;
+    border-collapse: collapse;
+    padding: 10px;
+    text-align: center;
+}
+
+th {
+    background-color: #255957;
+    color: white;
+    text-align: center;
+
+}
+
+table tr:nth-child(odd) {
+    background-color: #f1f1f1;
+    text-align: left;
+}
+
+table tr:nth-child(even) {
+    background-color: #ffffff;
+    text-align: left;
+}
+

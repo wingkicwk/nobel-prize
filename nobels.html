@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--reference: https://www.w3schools.com/css/css_rwd_viewport.asp -->
+    <title>Nobel Prize winners</title>
+    <link rel=stylesheet type="text/css" href="nobelspage.css">
+    <style>
+        h3 {
+            color: white;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>THE NOBEL PRIZE</h1>
+    <h2>"FOR THE GREATEST BENEFIT TO HUMANKIND"</h2>
+    <form>
+        Select the year and category of nobel prize winners you want to know more about<br><br>
+        Year from:
+        <select id="startYear" class="select-css" required></select>
+
+        To:
+        <select id="endYear" class="select-css" required></select>
+        <!--reference: https://www.w3schools.com/jsref/tryit.asp?filename=tryjsref_select_options_selindex -->
+
+        Category:
+        <select id="category" class="select-css">
+        </select>
+        <br><br>
+        <!--
+        To fix the problem of onsubmit value flashes and disappeares reference:
+        https://www.codeproject.com/Questions/668273/Calculator-in-javascript-on-submit-value-flashes-a
+-->
+        <input type="button" value="SUBMIT" onclick="return chosenYears_info();" id="button">
+
+    </form>
+    <!-- modal reference:https://www.w3schools.com/howto/howto_css_modals.asp-->
+    <div id='wrapper' class="modal">
+        <div id='winnerDetails' class="content"></div>
+    </div>
+    <div id='genderNotshow'></div>
+
+    <div id='Gender'></div>
+    <div id='prizesInfo'></div>
+
+    <script>
+        var xml = new XMLHttpRequest();
+        var prizesByYear = 'prizesByYear.json';
+        xml.onreadystatechange = function() {
+            if (xml.readyState == 4 && xml.status == 200) {
+                var parsedJSON = JSON.parse(xml.responseText);
+                document.getElementById("button").onclick = function() {
+                    chosenYears_info(parsedJSON);
+                }
+                getcategory(parsedJSON);
+            }
+        }
+        xml.open("GET", prizesByYear, true);
+        xml.send();
+
+        var xml2 = new XMLHttpRequest();
+        var winnersByID = 'winnersByID.json';
+        var parsedJSON2;
+        xml2.onreadystatechange = function() {
+            if (xml2.readyState == 4 && xml2.status == 200) {
+                parsedJSON2 = JSON.parse(xml2.responseText);
+                get_ID_gender(parsedJSON2);
+            }
+        }
+        xml2.open("GET", winnersByID, true);
+        xml2.send();
+
+
+
+        function loopStartYear() {
+            // reference:https://www.youtube.com/watch?v=q9bFsirYuX0
+            var syoptions = "<option value=''>Select</option>";
+            for (var i = 1970; i <= 2018; i++) {
+                syoptions += "<option value ='" + i + "'>" + i + "</option>";
+            }
+            document.getElementById("startYear").innerHTML = syoptions;
+        }
+
+        function loopEndYear() {
+
+            // reference:https://www.youtube.com/watch?v=q9bFsirYuX0
+            var eyoptions = "<option value=''>Select</option>";
+            for (var i = 1970; i <= 2018; i++) {
+                eyoptions += "<option value ='" + i + "'>" + i + "</option>";
+            }
+            document.getElementById("endYear").innerHTML = eyoptions;
+        }
+
+
+        function getcategory(obj) {
+            var catoptions = "<option value='all'>SelectAll</option>";
+            var prizesArray = obj.prizes;
+            var outputcat = [];
+            var count = 0;
+            var begin = false;
+            //remove duplicate category method reference: https://www.geeksforgeeks.org/how-to-get-all-unique-values-remove-duplicates-in-a-javascript-array/
+            for (var i = 0; i < prizesArray.length; i++) {
+                let category = prizesArray[i].category;
+                for (k = 0; k < outputcat.length; k++) {
+                    if (category == outputcat[k]) {
+                        begin = true;
+                    }
+                }
+                count++;
+                if (count == 1 && begin == false) {
+                    outputcat.push(category);
+                    catoptions += "<option value ='" + category + "'>" + category + "</option>";
+                }
+                begin = false;
+                count = 0;
+                document.getElementById("category").innerHTML = catoptions
+            }
+        }
+
+        function chosenYears_info(obj) {
+            var a = document.getElementsByTagName("h3");
+            var prizesArray = obj.prizes;
+            var sYear = document.getElementById("startYear").value;
+            var eYear = document.getElementById("endYear").value;
+            var categoryValue = document.getElementById("category").value;
+            var lArray = prizesArray.laureates;
+            if (sYear == '' && eYear == '') {
+                document.getElementById('prizesInfo').innerHTML = '<br>Please select a range of year.';
+                var showChooseGender = document.getElementById('Gender');
+                showChooseGender.style.display = 'none';
+            }
+            if (sYear <= eYear && sYear != '' && eYear != '') {
+                var chooseGender = '<br>' + '<form>' + '<h3>Select the winners you want to display base on gender:'
+
+                chooseGender += '<input type="radio" name="gender" value="all" onclick="return allGender_info();" id ="allGender" class="gbutton" checked>All';
+                chooseGender += '<input type="radio" name="gender" value="male" onclick="return male_info();" id="male"  class="gbutton" >Male';
+                chooseGender += '<input type="radio" name="gender" value="female" onclick="return female_info();"  id="female"  class="gbutton" >Female' + '</h3>';
+                //radio button reference:https://www.w3schools.com/tags/tryit.asp?filename=tryhtml5_input_type_radio
+                var showChooseGender = document.getElementById('Gender');
+                if (showChooseGender.style.display == 'none') {
+                    showChooseGender.style.display = 'block';
+                };
+                var prizeInfo = "<table border = 1 id='theTable'>";
+                prizeInfo += "<tr><th>Year</th><th>Category</th><th>Name</th><th>Motivation</th></tr>";
+                for (var i = 0; i < prizesArray.length; i++) {
+                    var prizesYear = prizesArray[i].year;
+                    var category = prizesArray[i].category;
+                    if (prizesYear >= sYear && prizesYear <= eYear) {
+                        if (categoryValue == 'all') {
+                            var lArray = prizesArray[i].laureates;
+                            var prizesYear = prizesArray[i].year;
+                            var category = prizesArray[i].category;
+                            var overallMotivation = prizesArray[i].overallMotivation;
+                            if (typeof overallMotivation === 'undefined') {
+                                overallMotivation = '/'
+                            }
+                            var laureate_details = "<br>";
+                            for (var k = 0; k < lArray.length; k++) {
+                                var pid = lArray[k].id;
+                                var firstname = lArray[k].firstname;
+                                var surname = lArray[k].surname;
+                                var motivation = lArray[k].motivation;
+                                for (e = 0; e < a.length; e++) {
+                                    var b = a[e].childNodes[0].nodeValue;
+                                    // how to access element from tag name reference:https://www.w3schools.com/xml/tryit.asp?filename=try_dom_getelementsbytagname1
+
+                                    //how to split elements using delimiter reference: https://www.youtube.com/watch?v=QIIOYK71M2o
+                                    var info = b.split(",");
+                                    var genderid = info[0];
+                                    var gender = info[1];
+                                    if (pid === genderid) {
+                                        var genderForPerson = gender;
+                                    }
+                                }
+
+                                if (typeof motivation === 'undefined') {
+                                    motivation = '\xa0\xa0\xa0' + '/'
+                                };
+                                prizeInfo += "<tr class=\"" + genderForPerson + "\" id = \"" + i + "\"><td>" + '\xa0' + prizesYear + '\xa0' + "</td><td>" + '\xa0' + category + '\xa0' + "</td><td>" + firstname + '\xa0' + surname + "<br><button  class='infob' onclick='return showDetail(" + pid + ");'>MORE INFO</button>" + "</td><td>" + motivation + "</td></tr>";
+                            }
+                        }
+                        if (categoryValue == category) {
+                            var lArray = prizesArray[i].laureates;
+                            var prizesYear = prizesArray[i].year;
+                            var overallMotivation = prizesArray[i].overallMotivation;
+                            if (typeof overallMotivation === 'undefined') {
+                                overallMotivation = '/'
+                            }
+                            var laureate_details = "<br>";
+                            for (var w = 0; w < lArray.length; w++) {
+                                var pid = lArray[w].id;
+                                var firstname = lArray[w].firstname;
+                                var surname = lArray[w].surname;
+                                var motivation = lArray[w].motivation;
+                                for (e = 0; e < a.length; e++) {
+                                    var b = a[e].childNodes[0].nodeValue;
+                                    var info = b.split(",");
+                                    var genderid = info[0];
+                                    var gender = info[1];
+                                    if (pid === genderid) {
+                                        var genderForPerson = gender;
+                                    }
+                                }
+
+                                if (typeof motivation === 'undefined') {
+                                    motivation = '\xa0\xa0\xa0' + '/'
+                                }
+                                prizeInfo += "<tr class=\"" + genderForPerson + "\" id = \"" + i + "\"><td>" + '\xa0' + prizesYear + '\xa0' + "</td><td>" + '\xa0' + category + '\xa0' + "</td><td>" + firstname + '\xa0' + surname + "<br><button  class='infob' onclick='return showDetail(" + pid + ");'>MORE INFO</button>" + "</td><td>" + motivation + "</td></tr>";
+                            }
+                        }
+
+                    }
+                }
+
+                prizeInfo += "</table>";
+                document.getElementById('prizesInfo').innerHTML = prizeInfo;
+                document.getElementById('Gender').innerHTML = chooseGender;
+            }
+            if (sYear > eYear) {
+                document.getElementById('prizesInfo').innerHTML = '<br>' + 'Start year must be less than end year, please select again.';
+                var showChooseGender = document.getElementById('Gender');
+                showChooseGender.style.display = 'none';
+            }
+        }
+
+        function showDetail(pid) {
+            var detailsDiv = document.getElementById("wrapper");
+            detailsDiv.style.display = "block";
+            //modal reference:https://www.w3schools.com/howto/howto_css_modals.asp
+            var winnerDetailss = " <span class=\"close\">&times;</span>";
+            var lInfo = parsedJSON2.laureates;
+            for (var i = 0; i < lInfo.length; i++) {
+                var wid = lInfo[i].id;
+                if (wid == pid) {
+                    var bornYear = lInfo[i].born;
+                    if (typeof bornYear === 'undefined' || bornYear == "0000-00-00") {
+                        bornYear = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '/'
+                    }
+                    var diedYear = lInfo[i].died;
+                    if (typeof diedYear === 'undefined' || diedYear == "0000-00-00") {
+                        diedYear = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '/'
+                    }
+                    var bornCity = lInfo[i].bornCity;
+                    if (typeof bornCity === 'undefined') {
+                        bornCity = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '/'
+                    }
+                    var prizesArray = lInfo[i].prizes;
+                    winnerDetailss += "<p>Year of Birth: " + bornYear + "</p><p>Year of Death: " + diedYear + "</p><p>City of Birth: " + bornCity + "</p><br>";
+                    for (var v = 0; v < prizesArray.length; v++) {
+                        var category = prizesArray[v].category;
+                        var motivation = prizesArray[v].motivation;
+                        if (typeof motivation === 'undefined') {
+                            motivation = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '/'
+                        }
+                        winnerDetailss += "<p>Category of award(s) received: " + category + "</p><p>Motivation: " + motivation + "</p><br>" + "<p>Affiliation(s) of the laureate when getting this award";
+                        var affiliations = prizesArray[v].affiliations;
+                        for (var h = 0; h < affiliations.length; h++) {
+                            var aName = affiliations[h].name;
+                            if (typeof aName === 'undefined') {
+                                aName = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '/'
+                            }
+                            var aCity = affiliations[h].city;
+                            if (typeof aCity === 'undefined') {
+                                aCity = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '/'
+                            }
+                            var aCountry = affiliations[h].country;
+                            if (typeof aCountry === 'undefined') {
+                                aCountry = '\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0\xa0' + '/'
+                            }
+                            winnerDetailss += "<br></p>" + "<p>Affiliation " + [h + 1] + "\xa0" + "name: " + aName + "</p>" + "</p><p>Affiliation " + [h + 1] + "\xa0" + "city: " + aCity + "</p>" + "</p><p>Affiliation " + [h + 1] + " country: " + aCountry + "</p><br>";
+                        }
+                    }
+                }
+
+            }
+            document.getElementById("winnerDetails").innerHTML = winnerDetailss;
+            var span = document.getElementsByClassName("close")[0];
+            span.onclick = function() {
+                detailsDiv.style.display = "none";
+            };
+            window.onclick = function(event) {
+                if (event.target == detailsDiv) {
+                    detailsDiv.style.display = "none";
+                }
+            }
+        }
+
+        function get_ID_gender(obj) {
+            var lInfo = obj.laureates;
+            var genderInfo = '<br>';
+            for (var i = 0; i < lInfo.length; i++) {
+                var wid = lInfo[i].id;
+                var gender = lInfo[i].gender;
+                genderInfo += "<h3>" + wid + ',' + gender + "</h3>"
+            }
+            document.getElementById("genderNotshow").innerHTML = genderInfo;
+            var div03 = document.getElementById('genderNotshow');
+            div03.style.display = "none";
+        }
+
+        function male_info() {
+            var allMale = document.getElementsByClassName("male");
+            var allFemale = document.getElementsByClassName("female");
+            var org = document.getElementsByClassName("org");
+            for (var i = 0; i < allMale.length; i++) {
+                allMale[i].style.display = "table-row";
+            }
+            for (i = 0; i < allFemale.length; i++) {
+                allFemale[i].style.display = "none";
+            }
+            for (i = 0; i < org.length; i++) {
+                org[i].style.display = "none";
+            }
+        }
+
+        function female_info() {
+            var allMale = document.getElementsByClassName("male");
+            var allFemale = document.getElementsByClassName("female");
+            var org = document.getElementsByClassName("org");
+            for (var i = 0; i < allMale.length; i++) {
+                allMale[i].style.display = "none";
+            }
+            for (i = 0; i < allFemale.length; i++) {
+                allFemale[i].style.display = "table-row";
+            }
+            for (i = 0; i < org.length; i++) {
+                org[i].style.display = "none";
+            }
+        }
+
+        function allGender_info() {
+            var allMale = document.getElementsByClassName("male");
+            var allFemale = document.getElementsByClassName("female");
+            var org = document.getElementsByClassName("org");
+            for (var i = 0; i < allMale.length; i++) {
+                allMale[i].style.display = "table-row";
+            }
+            for (i = 0; i < allFemale.length; i++) {
+                allFemale[i].style.display = "table-row";
+            }
+            for (i = 0; i < org.length; i++) {
+                org[i].style.display = "table-row";
+            }
+        }
+
+        //        reference:https://stackoverflow.com/questions/10122555/loading-javascript-in-body-onload-with-2-functions
+        window.onload = function() {
+            loopStartYear();
+            loopEndYear();
+        }
+    </script>
+
+</body></html>
